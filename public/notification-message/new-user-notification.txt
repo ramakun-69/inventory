@@ -1,0 +1,14 @@
+Halo *#NAME#*
+
+Selamat akun anda sudah dapat digunakan. Berikut adalah informasi akun Anda:
+
+*Email*   : #EMAIL#
+*Username* : #USERNAME#
+*Password* : #PASSWORD#
+
+Silahkan login terlebih dahulu kemudian ubah password demi menjaga kerahasiaan data Anda.
+
+
+Salam,
+Administrator
+
