@@ -202,5 +202,6 @@ export default {
         "Update Profile": "Perbarui Profil",
         "Update Password": "Perbarui Kata Sandi",
         "Profile Image": "Gambar Profil",
+        "Confirm Password": "Konfirmasi Kata Sandi",
     }
 };
