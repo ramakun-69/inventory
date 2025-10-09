@@ -187,13 +187,13 @@ export default function Navbar({ sidebarControl, mobileMenuControl, sidebarActiv
                                         <li>
                                             <Link
                                                 className='dropdown-item text-black px-0 py-8 hover-bg-transparent hover-text-primary d-flex align-items-center gap-3'
-                                                href='/view-profile'
+                                                href={route('profile.index')}
                                             >
                                                 <Icon
                                                     icon='solar:user-linear'
                                                     className='icon text-xl'
                                                 />{" "}
-                                                My Profile
+                                                {t('Profile')}
                                             </Link>
                                         </li>
                                     

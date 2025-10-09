@@ -189,5 +189,18 @@ export default {
         "Reports" : "Laporan",
         "Report" : "Laporan",
         "Item Report" : "Laporan Barang",
+        "Stock Entry Report" : "Laporan Stok Masuk",
+        "From" : "Dari",
+        "To" : "Sampai",
+        "Generate Report" : "Buat Laporan",
+        "Item Request Report" : "Laporan Permintaan Barang",
+        "Personal Info": "Info Pribadi",
+        "Change Password": "Ganti Kata Sandi",
+        "Current Password": "Kata Sandi Saat Ini",
+        "New Password": "Kata Sandi Baru",
+        "Confirm New Password": "Konfirmasi Kata Sandi Baru",
+        "Update Profile": "Perbarui Profil",
+        "Update Password": "Perbarui Kata Sandi",
+        "Profile Image": "Gambar Profil",
     }
 };

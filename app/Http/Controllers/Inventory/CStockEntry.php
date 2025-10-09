@@ -35,8 +35,8 @@ class CStockEntry extends Controller
         return $this->safeInertiaExecute(function () use ($request) {
             $data = $request->validated();
             $data['user_id'] = Auth::id();
-            if (empty($data['id'])) {
-                $data['entry_code'] = $this->generateEntryCode();
+            if ($data['id'] == null) {
+                $data['entry_number'] = $this->generateEntryCode();
             }
             $data['entry_date'] = Carbon::now();
             $this->inventoryRepository->stockEntry($data);
@@ -61,8 +61,8 @@ class CStockEntry extends Controller
         $latestEntry = StockEntry::orderBy('created_at', 'desc')->first();
         if ($latestEntry) {
             // Ambil nomor terakhir setelah tanda "-"
-            $lastCode = $latestEntry->entry_code;
-            $lastNumber = (int) substr($lastCode, strrpos($lastCode, '-') + 1);
+            $lastNumber = $latestEntry->entry_number;
+            $lastNumber = (int) substr($lastNumber, strrpos($lastNumber, '-') + 1);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';

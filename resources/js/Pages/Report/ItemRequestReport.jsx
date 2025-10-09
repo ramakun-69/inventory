@@ -10,7 +10,9 @@ import { useForm } from "@inertiajs/react";
 import Button from "../../src/components/ui/Button";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { notifyError } from "../../src/components/ui/Toastify";
-export default function ItemReport({ categories, suppliers }) {
+import TextInput from "../../src/components/ui/TextInput";
+import { toDateString } from "../../helper";
+export default function ItemRequestReport({ divisions }) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState([]);
     // Pagination states
@@ -20,19 +22,21 @@ export default function ItemReport({ categories, suppliers }) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isExporting, setIsExporting] = useState(false)
     const { data, setData } = useForm({
-        category_id: '',
-        supplier_id: '',
+        start_date: '',
+        end_date: '',
+        division_id: '',
     });
-    const { category_id: categoryId, supplier_id: supplierId } = data;
+    const { start_date: startDate, end_date: endDate, division_id: divisionId } = data;
 
     const loadTableData = () => {
         setIsLoading(true);
-        axios.get(route('datatable.item-report'), {
+        axios.get(route('datatable.item-request-report'), {
             params: {
                 page: currentPage,
                 per_page: rowsPerPage,
-                category_id: categoryId,
-                supplier_id: supplierId,
+                start_date: startDate,
+                end_date: endDate,
+                division_id: divisionId,
             },
         }).then((res) => {
             setTableData(res.data.data);
@@ -42,60 +46,66 @@ export default function ItemReport({ categories, suppliers }) {
     };
     useEffect(() => {
         loadTableData();
-    }, [currentPage, rowsPerPage, categoryId, supplierId]);
-    const COLUMN = [
-        {
-            name: 'No',
-            cell: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
-            sortable: true,
-            width: '100px',
-            style: {
-                textAlign: 'center',
-            },
-        },
-        {
-            name: t('Item Code'),
-            selector: row => row.item_code,
-            sortable: true,
-        },
-        {
-            name: t('Name'),
-            selector: row => row.name,
-            sortable: true,
-        },
-        {
-            name: t('Category'),
-            selector: row => row.category.name,
-            sortable: true,
-        },
-        {
-            name: t('Supplier'),
-            selector: row => row.supplier.name,
-            sortable: true,
-        },
-        {
-            name: t('Stock'),
-            selector: row => `${row.stock} ${row?.unit?.name}`,
-            sortable: true,
-        },
-    ];
+    }, [currentPage, rowsPerPage, endDate, divisionId]);
+  const COLUMN = [
+          {
+              name: 'No',
+              cell: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
+              sortable: true,
+              width: '100px',
+              style: {
+                  textAlign: 'center',
+              },
+          },
+          {
+              name: t('Request Number'),
+              selector: row => row.request_number,
+              sortable: true,
+          },
+          {
+              name: t('Requested By'),
+              selector: row => row?.user?.name,
+              sortable: true,
+          },
+          {
+              name: t('Purpose'),
+              selector: row => row?.purpose,
+              sortable: true,
+          },
+          {
+              name: t('Status'),
+              selector: row => {
+                  const status = row.status ?? '-';
+                  if (status === 'Pending') {
+                      return <span className="badge bg-warning">{t('Pending')}</span>;
+                  } else if (status === 'Approved') {
+                      return <span className="badge bg-success">{t('Approved')}</span>;
+                  } else if (status === 'Rejected') {
+                      return <span className="badge bg-danger">{t('Rejected')}</span>;
+                  } else {
+                      return <span className="badge bg-secondary">{status}</span>;
+                  }
+              },
+              sortable: true,
+          },
+      ];
 
     const handleExport = async () => {
         try {
             setIsExporting(true); // mulai animasi
 
-            const response = await axios.post(route("report.items.export"), {
-                category_id: categoryId,
-                supplier_id: supplierId,
+            const response = await axios.post(route("report.item-requests.export"), {
+                start_date: startDate,
+                end_date: endDate,
+                division_id: divisionId,
             }, {
                 responseType: "blob", // penting, letakkan di sini, bukan di body
             });
-
             const blob = new Blob([response.data]);
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", `${t('Item Report')}.xlsx`);
+            link.setAttribute("download", `${t('Item Request Report')}.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -108,41 +118,50 @@ export default function ItemReport({ categories, suppliers }) {
 
     return (
         <AppLayout>
-            <Breadcrumb title={t('Report')} subtitle={t('Item Report')} />
+            <Breadcrumb title={t('Report')} subtitle={t('Item Request Report')} />
             <div className="container">
                 <div className="card">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-12 d-flex justify-content-start mb-50 gap-3">
-                                <div className="col-md-4">
-                                    <label htmlFor="category_id" className="form-label">{t('Category')}</label>
-                                    <Select
-                                        id="category_id"
-                                        options={categories.map(c => ({ value: c.id, label: c.name }))}
-                                        onChange={(option) => {
-                                            setData('category_id', option ? option.value : '');
+                                <div className="col-md-3">
+                                    <label htmlFor="start_date" className="form-label">{t('From')}</label>
+                                    <TextInput
+                                        type="date"
+                                        id="start_date"
+                                        value={startDate}
+                                        onChange={(e) => {
+                                            setData('start_date', e.target.value);
                                         }}
-                                        placeholder={t('Select Category')}
-                                        isSearchable={true}
-                                        isClearable={true}
-                                        value={categories.map(c => ({ value: c.id, label: c.name }))
-                                            .find(option => option.value === categoryId) || null
-                                        }
+                                        placeholder={t('Enter Start Date')}
+                                    />
+                                </div>
+                                <div className="col-md-3">
+                                    <label htmlFor="end_date" className="form-label">{t('To')}</label>
+                                    <TextInput
+                                        type="date"
+                                        id="end_date"
+                                        value={endDate}
+                                        disabled={!startDate}
+                                        onChange={(e) => {
+                                            setData('end_date', e.target.value);
+                                        }}
+                                        placeholder={t('Enter End Date')}
                                     />
                                 </div>
                                 <div className="col-md-4">
-                                    <label htmlFor="supplier_id" className="form-label">{t('Supplier')}</label>
+                                    <label htmlFor="division_id" className="form-label">{t('Division')}</label>
                                     <Select
-                                        id="supplier_id"
-                                        options={suppliers.map(s => ({ value: s.id, label: s.name }))}
+                                        id="division_id"
+                                        options={divisions.map(d => ({ value: d.id, label: d.name }))}
                                         onChange={(option) => {
-                                            setData('supplier_id', option ? option.value : '');
+                                            setData('division_id', option ? option.value : '');
                                         }}
-                                        placeholder={t('Select Supplier')}
+                                        placeholder={t('Select Division')}
                                         isSearchable={true}
                                         isClearable={true}
-                                        value={suppliers.map(s => ({ value: s.id, label: s.name }))
-                                            .find(option => option.value === supplierId) || null
+                                        value={divisions.map(d => ({ value: d.id, label: d.name }))
+                                            .find(option => option.value === divisionId) || null
                                         }
                                     />
                                 </div>

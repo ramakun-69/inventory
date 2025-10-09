@@ -10,7 +10,9 @@ import { useForm } from "@inertiajs/react";
 import Button from "../../src/components/ui/Button";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { notifyError } from "../../src/components/ui/Toastify";
-export default function ItemReport({ categories, suppliers }) {
+import TextInput from "../../src/components/ui/TextInput";
+import { toDateString } from "../../helper";
+export default function StockEntryReport({ suppliers }) {
     const { t } = useTranslation();
     const [tableData, setTableData] = useState([]);
     // Pagination states
@@ -20,18 +22,20 @@ export default function ItemReport({ categories, suppliers }) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [isExporting, setIsExporting] = useState(false)
     const { data, setData } = useForm({
-        category_id: '',
+        start_date: '',
+        end_date: '',
         supplier_id: '',
     });
-    const { category_id: categoryId, supplier_id: supplierId } = data;
+    const { start_date: startDate, end_date: endDate, supplier_id: supplierId } = data;
 
     const loadTableData = () => {
         setIsLoading(true);
-        axios.get(route('datatable.item-report'), {
+        axios.get(route('datatable.stock-entry-report'), {
             params: {
                 page: currentPage,
                 per_page: rowsPerPage,
-                category_id: categoryId,
+                start_date: startDate,
+                end_date: endDate,
                 supplier_id: supplierId,
             },
         }).then((res) => {
@@ -42,7 +46,7 @@ export default function ItemReport({ categories, suppliers }) {
     };
     useEffect(() => {
         loadTableData();
-    }, [currentPage, rowsPerPage, categoryId, supplierId]);
+    }, [currentPage, rowsPerPage, endDate, supplierId]);
     const COLUMN = [
         {
             name: 'No',
@@ -54,28 +58,36 @@ export default function ItemReport({ categories, suppliers }) {
             },
         },
         {
-            name: t('Item Code'),
-            selector: row => row.item_code,
+            name: t('Entry Number'),
+            selector: row => row.entry_number,
             sortable: true,
         },
         {
-            name: t('Name'),
-            selector: row => row.name,
+            name: t('Item'),
+            selector: row => row?.item?.name,
             sortable: true,
         },
+
         {
-            name: t('Category'),
-            selector: row => row.category.name,
+            name: t('Quantity'),
+            selector: row => row.quantity,
             sortable: true,
         },
+
         {
             name: t('Supplier'),
-            selector: row => row.supplier.name,
+            selector: row => row?.supplier?.name,
             sortable: true,
         },
         {
-            name: t('Stock'),
-            selector: row => `${row.stock} ${row?.unit?.name}`,
+            name: t('Entry Date'),
+            selector: row => toDateString(row?.entry_date),
+            sortable: true,
+        },
+
+        {
+            name: t('Added By'),
+            selector: row => row?.user?.name,
             sortable: true,
         },
     ];
@@ -84,8 +96,9 @@ export default function ItemReport({ categories, suppliers }) {
         try {
             setIsExporting(true); // mulai animasi
 
-            const response = await axios.post(route("report.items.export"), {
-                category_id: categoryId,
+            const response = await axios.post(route("report.stock-entries.export"), {
+                start_date: startDate,
+                end_date: endDate,
                 supplier_id: supplierId,
             }, {
                 responseType: "blob", // penting, letakkan di sini, bukan di body
@@ -95,7 +108,7 @@ export default function ItemReport({ categories, suppliers }) {
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.setAttribute("download", `${t('Item Report')}.xlsx`);
+            link.setAttribute("download", `${t('Stock Entry Report')}.xlsx`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -108,26 +121,35 @@ export default function ItemReport({ categories, suppliers }) {
 
     return (
         <AppLayout>
-            <Breadcrumb title={t('Report')} subtitle={t('Item Report')} />
+            <Breadcrumb title={t('Report')} subtitle={t('Stock Entry Report')} />
             <div className="container">
                 <div className="card">
                     <div className="card-body">
                         <div className="row">
                             <div className="col-12 d-flex justify-content-start mb-50 gap-3">
-                                <div className="col-md-4">
-                                    <label htmlFor="category_id" className="form-label">{t('Category')}</label>
-                                    <Select
-                                        id="category_id"
-                                        options={categories.map(c => ({ value: c.id, label: c.name }))}
-                                        onChange={(option) => {
-                                            setData('category_id', option ? option.value : '');
+                                <div className="col-md-3">
+                                    <label htmlFor="start_date" className="form-label">{t('From')}</label>
+                                    <TextInput
+                                        type="date"
+                                        id="start_date"
+                                        value={startDate}
+                                        onChange={(e) => {
+                                            setData('start_date', e.target.value);
                                         }}
-                                        placeholder={t('Select Category')}
-                                        isSearchable={true}
-                                        isClearable={true}
-                                        value={categories.map(c => ({ value: c.id, label: c.name }))
-                                            .find(option => option.value === categoryId) || null
-                                        }
+                                        placeholder={t('Enter Start Date')}
+                                    />
+                                </div>
+                                <div className="col-md-3">
+                                    <label htmlFor="end_date" className="form-label">{t('To')}</label>
+                                    <TextInput
+                                        type="date"
+                                        id="end_date"
+                                        value={endDate}
+                                        disabled={!startDate}
+                                        onChange={(e) => {
+                                            setData('end_date', e.target.value);
+                                        }}
+                                        placeholder={t('Enter End Date')}
                                     />
                                 </div>
                                 <div className="col-md-4">

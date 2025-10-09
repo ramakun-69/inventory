@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CIndex;
+use App\Http\Controllers\CProfile;
 use App\Http\Controllers\CSettings;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Master\CItem;
@@ -9,10 +10,12 @@ use App\Http\Controllers\Master\CUser;
 use App\Http\Controllers\Master\CCategory;
 use App\Http\Controllers\Master\CDivision;
 use App\Http\Controllers\Master\CSupplier;
+use App\Http\Controllers\Report\CItemReport;
 use App\Http\Controllers\Inventory\CStockEntry;
 use App\Http\Controllers\Inventory\CItemRequest;
 use App\Http\Controllers\Inventory\CStockTaking;
-use App\Http\Controllers\Report\CItemReport;
+use App\Http\Controllers\Report\CStockEntryReport;
+use App\Http\Controllers\Report\CItemRequestReport;
 
 Route::middleware(['auth'])->group(function () {
     Route::middleware('role:Admin|User|Warehouse')->group(function () {
@@ -55,8 +58,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('item-requests', CItemRequest::class);
     });
     Route::prefix('report')->middleware('role:Admin|Warehouse')->name('report.')->group(function () {
+        Route::post('items/export', [CItemReport::class, 'store'])->name('items.export');
         Route::resource('items', CItemReport::class);
+        Route::post('stock-entries/export', [CStockEntryReport::class, 'store'])->name('stock-entries.export');
+        Route::resource('stock-entries', CStockEntryReport::class);
+        Route::post('item-requests/export', [CItemRequestReport::class, 'store'])->name('item-requests.export');
+        Route::resource('item-requests', CItemRequestReport::class);
     });
 
     Route::resource('settings', CSettings::class)->middleware('role:Admin');
+    Route::resource('profile', CProfile::class);
 });

@@ -108,10 +108,26 @@ export default function Menu({ ...props }) {
                             <span>{t('Reports')}</span>
                         </Link>
                         <ul className='sidebar-submenu'>
-                            <Link href={route('report.items.index')} className={isActive('report.items.*')}>
-                                <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
-                                <span>{t('Items')}</span>
-                            </Link>
+                            <li>
+                                <Link href={route('report.items.index')} className={isActive('report.items.*')}>
+                                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />
+                                    <span>{t('Items')}</span>
+                                </Link>
+                            </li>
+                            
+                            <li>
+                                <Link href={route('report.stock-entries.index')} className={isActive('report.stock-entries.*')}>
+                                    <i className='ri-circle-fill circle-icon text-danger-600 w-auto' />
+                                    <span>{t('Stock Entries')}</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href={route('report.item-requests.index')} className={isActive('report.item-requests.*')}>
+                                    <i className='ri-circle-fill circle-icon text-success-600 w-auto' />
+                                    <span>{t('Item Requests')}</span>
+                                </Link>
+                            </li>
+
 
                         </ul>
                     </li>

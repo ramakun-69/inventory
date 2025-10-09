@@ -286,5 +286,16 @@
     "Actual stock must be at least 0" : "Stok aktual harus minimal 0",
     "Stock Taking created successfully" : "Penghitungan Stok berhasil dibuat",
     "Stock Taking updated successfully" : "Penghitungan Stok berhasil diperbarui",
-    "Stock Taking deleted successfully" : "Penghitungan Stok berhasil dihapus"
+    "Stock Taking deleted successfully" : "Penghitungan Stok berhasil dihapus",
+    "Item Report" : "Laporan Barang",
+    "Request Number" : "Nomor Permintaan",
+    "Request Date" : "Tanggal Permintaan",
+    "Requested By" : "Diajukan Oleh",
+    "Division" : "Divisi",
+    "Purpose" : "Keperluan",
+    "Status" : "Status",
+    "Item Name" : "Nama Barang",
+    "Quantity" : "Jumlah",
+    "Unit" : "Satuan",
+    "Pending" : "Pending"
 }

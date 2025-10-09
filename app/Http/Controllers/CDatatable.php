@@ -240,4 +240,49 @@ class CDatatable extends Controller
             'per_page' => $data->perPage(),
         ]);
     }
+
+    public function stockEntryReport(Request $request)
+    {
+
+        $perPage = $request->get('per_page', 10);
+        $data = StockEntry::with(['item', 'supplier', 'user'])
+            ->when($request->filled('start_date') && $request->filled('end_date'), function ($query) use ($request) {
+                $query->whereBetween('entry_date', [$request->start_date, $request->end_date]);
+            })
+            ->when(
+                $request->filled('supplier_id'),
+                fn($q) =>
+                $q->where('supplier_id', $request->supplier_id)
+            )
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $data->items(),
+            'total' => $data->total(),
+            'current_page' => $data->currentPage(),
+            'per_page' => $data->perPage(),
+        ]);
+    }
+    public function itemRequestReport(Request $request)
+    {
+
+        $perPage = $request->get('per_page', 10);
+        $data = ItemRequest::with(['user', 'items.unit'])
+            ->when($request->filled('start_date') && $request->filled('end_date'), function ($query) use ($request) {
+                $query->whereBetween('request_date', [$request->start_date, $request->end_date]);
+            })
+            ->when(
+                $request->filled('division_id'),
+                fn($q) =>
+                $q->whereHas('user', fn($q2) => $q2->where('division_id', $request->division_id))
+            )
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $data->items(),
+            'total' => $data->total(),
+            'current_page' => $data->currentPage(),
+            'per_page' => $data->perPage(),
+        ]);
+    }
 }
