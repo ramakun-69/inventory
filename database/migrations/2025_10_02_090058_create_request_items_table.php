@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('request_items', function (Blueprint $table) {
             $table->foreignUuid('request_id')
-                ->constrained('item_requests')
+                ->constrained('requests')
                 ->cascadeOnDelete();
 
             $table->foreignUuid('item_id')
