@@ -15,6 +15,7 @@ class Item extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $appends = ['image_url'];
+    protected $with = ['unit'];
 
     public function category()
     {
@@ -22,13 +23,8 @@ class Item extends Model
     }
     public function unit()
     {
-        return $this->belongsTo(Unit::class);
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
-    public function supplier()
-    {
-        return $this->belongsTo(Supplier::class);
-    }
-
     public function getImageUrlAttribute()
     {
         if ($this->image && File::exists(storage_path("app/public/" . $this->image))) {

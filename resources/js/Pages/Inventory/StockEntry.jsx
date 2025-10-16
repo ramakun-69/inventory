@@ -9,15 +9,14 @@ import Search from "../../src/components/datatable/Search";
 import Modal from "../../src/components/ui/Modal";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Loading from "../../src/components/datatable/Loading";
-import Select from "react-select"
 import axios from "axios";
-import TextInput from "../../src/components/ui/TextInput";
-import ErrorMessage from "../../src/components/ui/ErrorMessage";
 import { notifyError, notifySuccess } from "../../src/components/ui/Toastify";
-import EditButton from "../../src/components/datatable/EditButton";
+import ShowButton from "../../src/components/datatable/ShowButton";
 import DeleteButton from "../../src/components/datatable/DeleteButton";
 import { toDateString } from "../../helper";
 import { confirmAlert } from "../../src/components/ui/SweetAlert";
+import StockEntryForm from "./Partials/StockEntryForm";
+import StockEntryDetail from "./Partials/StockEntryDetail";
 
 
 export default function StockEntry({ items, suppliers }) {
@@ -27,13 +26,12 @@ export default function StockEntry({ items, suppliers }) {
         title: "",
         onSave: () => { },
         processing: false,
+        detail: false,
     });
     const [isLoading, setIsLoading] = useState(false);
     const { data, setData, post, delete: destroy, processing, errors, clearErrors, reset } = useForm({
         id: null,
-        item_id: '',
-        supplier_id: '',
-        quantity: ''
+        items: [{ item_id: null, supplier_id: null, quantity: 0 }],
     });
     const [tableData, setTableData] = useState([]);
     // Pagination states
@@ -75,23 +73,6 @@ export default function StockEntry({ items, suppliers }) {
             sortable: true,
         },
         {
-            name: t('Item'),
-            selector: row => row?.item?.name,
-            sortable: true,
-        },
-
-        {
-            name: t('Quantity'),
-            selector: row => row.quantity,
-            sortable: true,
-        },
-
-        {
-            name: t('Supplier'),
-            selector: row => row?.supplier?.name,
-            sortable: true,
-        },
-        {
             name: t('Entry Date'),
             selector: row => toDateString(row?.entry_date),
             sortable: true,
@@ -107,7 +88,7 @@ export default function StockEntry({ items, suppliers }) {
             name: t('Actions'),
             cell: (row) => (
                 <>
-                    <EditButton onClick={() => handleShowModal(row)} isLoading={isLoading} />
+                    <ShowButton onClick={() => handleShowModal(row, true)} isLoading={isLoading} />
                     <DeleteButton onClick={() => handleDelete(row.id)} isLoading={isLoading} />
                 </>
             ),
@@ -115,11 +96,31 @@ export default function StockEntry({ items, suppliers }) {
         }
     ];
 
-    const handleShowModal = (stock_entry = null) => {
-        stock_entry ? setData({ ...stock_entry }) : reset();
+    const handleShowModal = (stock_entry = null, detail = false) => {
+        setData({
+            id: stock_entry?.id ?? null,
+            entry_number: stock_entry?.entry_number ?? null,
+            user: stock_entry?.user ?? null,
+            entry_date: stock_entry?.entry_date ?? "",
+            items:stock_entry?.details?.length > 0 ? stock_entry.details.map(detail => ({
+                    id: detail?.id ?? null,
+                    item_id: detail?.item_id ?? null,
+                    item_name : detail?.item?.name,
+                    quantity: detail?.quantity ?? 0,
+                    unit : detail?.item?.unit?.name ?? "",
+                    supplier_id: detail?.supplier_id ?? null,
+                }))
+                : [{ item_id: null, quantity: "", supplier_id: null }],
+        });
+
         setModal({
             show: true,
-            title: stock_entry ? t('Edit Stock Entry') : t('Add Stock Entry'),
+            title: detail
+                ? t("Stock Entry Detail")
+                : stock_entry
+                    ? t("Edit Stock Entry")
+                    : t("Add Stock Entry"),
+            detail,
         });
     }
     const handleCloseModal = () => {
@@ -218,69 +219,13 @@ export default function StockEntry({ items, suppliers }) {
                     title={modal.title}
                     onSave={handleSubmit}
                     processing={processing}
-                    size="lg"
+                    size="xl"
                 >
-                    <div className="row mb-3">
-                        <div className="col-6">
-                            <label htmlFor="item_id" className="form-label">{t('Item')}</label>
-                            <Select
-                                id="item_id"
-                                options={items.map(c => ({ value: c.id, label: c.name }))}
-                                onChange={(option) => {
-                                    clearErrors('item_id');
-                                    setData('item_id', option ? option.value : '');
-                                }}
-                                placeholder={t('Select Item')}
-                                isSearchable={true}
-                                isClearable={true}
-                                value={items.map(c => ({ value: c.id, label: c.name }))
-                                    .find(option => option.value === data.item_id) || null
-                                }
-                            />
-                            {errors.item_id && <ErrorMessage message={errors.item_id} />}
-                        </div>
-                        <div className="col-6">
-                            <label htmlFor="supplier_id" className="form-label">{t('Supplier')}</label>
-                            <Select
-                                id="supplier_id"
-                                options={suppliers.map(c => ({ value: c.id, label: c.name }))}
-                                onChange={(option) => {
-                                    clearErrors('supplier_id');
-                                    setData('supplier_id', option ? option.value : '');
-                                }}
-                                placeholder={t('Select Supplier')}
-                                isSearchable={true}
-                                isClearable={true}
-                                value={suppliers.map(c => ({ value: c.id, label: c.name }))
-                                    .find(option => option.value === data.supplier_id) || null
-                                }
-                            />
-                            {errors.supplier_id && <ErrorMessage message={errors.supplier_id} />}
-                        </div>
-                    </div>
-                    <div className="row mb-3">
-                        <div className="col-12">
-                            <label htmlFor="quantity" className="form-label">{t('Quantity')}</label>
-                            <TextInput
-                                id="quantity"
-                                type="number"
-                                className="form-control"
-                                autoComplete="off"
-                                min={1}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
-                                        e.preventDefault();
-                                    }
-                                }}
-                                onChange={(e) => {
-                                    let onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                                    setData('quantity', onlyNums);
-                                }}
-                                placeholder={t('Enter Attribute', { 'attribute': t('Quantity') })}
-                                value={data.quantity}
-                                errorMessage={errors.quantity} />
-                        </div>
-                    </div>
+                    {modal.detail ? (
+                        <StockEntryDetail stockEntry={data} />
+                    ) : (
+                        <StockEntryForm items={items} suppliers={suppliers} data={data} setData={setData} errors={errors} clearErrors={clearErrors} />
+                    )}
                 </Modal>
             </AppLayout>
         </>

@@ -11,6 +11,7 @@ use App\Models\StockEntry;
 use App\Models\ItemRequest;
 use App\Models\RequestItem;
 use App\Models\StockTaking;
+use App\Models\StockEntryDetail;
 use App\Models\StockTakingDetail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -37,38 +38,68 @@ class InventoryRepositoryImplement extends Eloquent implements InventoryReposito
     public function stockEntry($data)
     {
         DB::transaction(function () use ($data) {
-            $oldEntry = !empty($data['id'])
-                ? StockEntry::find($data['id'])
-                : null;
+            $userId = Auth::id();
 
-            // Simpan atau update entry
-            $entry = $this->appRepository->updateOrCreateOneModel(
-                new StockEntry(),
+            // 1️⃣ Simpan atau update StockEntry (header)
+            $entry = StockEntry::updateOrCreate(
                 ['id' => $data['id'] ?? null],
-                $data
+                [
+                    'entry_number' => $data['id']
+                        ? StockEntry::find($data['id'])->entry_number
+                        : $data['entry_number'],
+                    'user_id' => $userId,
+                    'entry_date' => $data['entry_date'] ?? now(),
+                ]
             );
-            Item::findOrFail($entry->item_id)->update([
-                'supplier_id' => $data['supplier_id']
-            ]);
-            // Jika update → hitung selisih quantity
-            if ($oldEntry) {
-                // Jika item sama
-                if ($oldEntry->item_id == $entry->item_id) {
-                    $diff = $entry->quantity - $oldEntry->quantity;
-                    if ($diff !== 0) {
-                        Item::where('id', $entry->item_id)->increment('stock', $diff);
-                    }
-                } else {
-                    // Item berubah → rollback stok lama, tambah stok baru
-                    Item::where('id', $oldEntry->item_id)->decrement('stock', $oldEntry->quantity);
-                    Item::where('id', $entry->item_id)->increment('stock', $entry->quantity);
-                }
-            } else {
-                // Jika create baru
-                Item::where('id', $entry->item_id)->increment('stock', $entry->quantity);
+
+            $entryId = $entry->id;
+
+            // 2️⃣ Ambil detail lama (kalau ada)
+            $existingDetails = StockEntryDetail::where('stock_entry_id', $entryId)
+                ->get()
+                ->keyBy('item_id');
+
+            $upsertData = [];
+
+            // 3️⃣ Loop semua item dari form
+            foreach ($data['items'] as $item) {
+                $existing = $existingDetails[$item['item_id']] ?? null;
+
+                // Hitung perubahan stok (diff)
+                $oldQty = $existing ? (int) $existing->quantity : 0;
+                $newQty = (int) $item['quantity'];
+                $diff = $newQty - $oldQty;
+
+                // Siapkan data untuk upsert
+                $upsertData[] = [
+                    'id' => $existing?->id ?? Uuid::uuid4()->toString(),
+                    'stock_entry_id' => $entryId,
+                    'item_id' => $item['item_id'],
+                    'quantity' => $newQty,
+                    'supplier_id' => $item['supplier_id'],
+                    'created_at' => $existing?->created_at ?? now(),
+                    'updated_at' => now(),
+                ];
+
+                // Update stok barang hanya berdasarkan selisih
+                Item::where('id', $item['item_id'])->increment('stock', $diff);
             }
+
+            // 5️⃣ Upsert detail (insert/update)
+            StockEntryDetail::upsert(
+                $upsertData,
+                ['id'], // unique key
+                ['quantity', 'supplier_id', 'updated_at']
+            );
+
+            // 6️⃣ Hapus detail yang dihapus dari form
+            $requestItemIds = collect($data['items'])->pluck('item_id')->all();
+            StockEntryDetail::where('stock_entry_id', $entryId)
+                ->whereNotIn('item_id', $requestItemIds)
+                ->delete();
         });
     }
+
     public function itemRequest($data)
     {
         DB::transaction(function () use ($data) {
@@ -116,10 +147,26 @@ class InventoryRepositoryImplement extends Eloquent implements InventoryReposito
     public function deleteStockEntry($stockEntry)
     {
         DB::transaction(function () use ($stockEntry) {
-            Item::where('id', $stockEntry->item_id)->decrement('stock', $stockEntry->quantity);
+
+            // Pastikan relasi details sudah dimuat
+            $stockEntry->load('details.item');
+
+            // Rollback stok tiap item
+            foreach ($stockEntry->details as $detail) {
+                $qty = (int) ($detail->quantity ?? 0);
+                if ($qty > 0 && $detail->item) {
+                    $detail->item->decrement('stock', $qty);
+                }
+            }
+
+            // Hapus semua detail
+            $stockEntry->details()->delete();
+
+            // Hapus header entry
             $stockEntry->delete();
         });
     }
+
 
     public function confirmItemRequest($itemRequest, $status)
     {

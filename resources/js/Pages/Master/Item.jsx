@@ -34,7 +34,6 @@ export default function Item({ categories, units, suppliers }) {
         item_name: '',
         category_id: '',
         unit_id: '',
-        supplier_id: '',
         stock: '',
         description: '',
         image: null,
@@ -95,11 +94,6 @@ export default function Item({ categories, units, suppliers }) {
         {
             name: t('Category'),
             selector: row => row.category.name,
-            sortable: true,
-        },
-        {
-            name: t('Supplier'),
-            selector: row => row.supplier.name,
             sortable: true,
         },
         {
@@ -275,25 +269,7 @@ export default function Item({ categories, units, suppliers }) {
                         />
                         {errors.category_id && <ErrorMessage message={errors.category_id} />}
                     </div>
-                    <div className="col-6 mb-3">
-                        <label htmlFor="supplier_id" className="form-label">{t('Supplier')}</label>
-                        <Select
-                            id="supplier_id"
-                            options={suppliers.map(s => ({ value: s.id, label: s.name }))}
-                            onChange={(option) => {
-                                clearErrors('supplier_id');
-                                setData('supplier_id', option ? option.value : '');
-                            }}
-                            placeholder={t('Select Supplier')}
-                            isSearchable={true}
-                            isClearable={true}
-                            value={suppliers.map(s => ({ value: s.id, label: s.name }))
-                                .find(option => option.value === data.supplier_id) || null
-                            }
-                        />
-                        {errors.supplier_id && <ErrorMessage message={errors.supplier_id} />}
 
-                    </div>
                     <div className="col-6 mb-3">
                         <label htmlFor="stock" className="form-label">{t('Stock')}</label>
                         <TextInput

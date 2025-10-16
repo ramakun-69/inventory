@@ -6,13 +6,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StockEntryRequest extends FormRequest
 {
-    protected $fill =
-    [
+    protected $fill = [
         'id' => 0,
-        'item_id' => 1,
-        'supplier_id' => 1,
-        'quantity' => 1,
-
+        'items' => 1,
     ];
     /**
      * Determine if the user is authorized to make this request.
@@ -32,26 +28,35 @@ class StockEntryRequest extends FormRequest
 
     public function rules(): array
     {
-        $dataValidate = [];
-        foreach (array_keys($this->fill) as $key) {
-            $dataValidate[$key] = ($this->fill[$key] == 1) ? 'required' : 'nullable';
+        $rules = [];
+
+        foreach ($this->fill as $key => $isRequired) {
+            $rules[$key] = $isRequired ? 'required' : 'nullable';
+
             switch ($key) {
-                case 'quantity':
-                    $dataValidate[$key] .= '|numeric|min:1';
+                case 'items':
+                    // validasi array items
+                    $rules[$key] .= '|array|min:1';
+                    $rules["{$key}.*.item_id"] = 'required|exists:items,id';
+                    $rules["{$key}.*.quantity"] = 'required|numeric|min:1';
+                    $rules["{$key}.*.supplier_id"] = 'required|exists:suppliers,id';
                     break;
             }
         }
 
-        return $dataValidate;
+        return $rules;
     }
 
     public function messages()
     {
-        return [
-            'item_id.required' => __("Select Item First"),
-            'supplier_id.required' => __("Select Supplier First"),
-            'quantity.numeric' => __("Quantity must be a number"),
-            'quantity.min' => __("Quantity must be at least 1"),
+       return [
+            'items.required' => __("Please add at least one item"),
+            'items.min' => __("Please add at least one item"),
+            'items.*.item_id.required' => __("Item is required"),
+            'items.*.quantity.required' => __("Quantity is required"),
+            'items.*.supplier_id.required' => __("Supplier is required"),
+            'items.*.quantity.min' => __("Quantity must be at least 1"),
+            'purpose.required' => __("Purpose is required"),
         ];
     }
 }

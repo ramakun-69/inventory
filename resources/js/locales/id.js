@@ -203,5 +203,7 @@ export default {
         "Update Password": "Perbarui Kata Sandi",
         "Profile Image": "Gambar Profil",
         "Confirm Password": "Konfirmasi Kata Sandi",
+        "Entry Date": "Tanggal Masuk",
+        "Created By": "Dibuat Oleh",
     }
 };

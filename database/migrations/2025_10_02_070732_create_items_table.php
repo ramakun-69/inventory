@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('item_code')->unique()->index();
             $table->foreignUuid('category_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignUuid('supplier_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignUuid('unit_id')->nullable()->constrained()->onDelete('set null');
             $table->integer('stock')->default(0);
             $table->longText('description')->nullable();

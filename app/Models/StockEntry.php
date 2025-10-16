@@ -12,11 +12,11 @@ class StockEntry extends Model
     protected $guarded = ['id'];
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $with = ['item', 'supplier', 'user'];
+    protected $with = ['details', 'supplier', 'user'];
 
-    public function item()
+    public function details()
     {
-        return $this->belongsTo(Item::class);
+        return $this->hasMany(StockEntryDetail::class);
     }
     public function supplier()
     {

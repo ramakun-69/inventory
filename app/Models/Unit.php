@@ -12,4 +12,9 @@ class Unit extends Model
     protected $guarded = ['id'];
     protected $keyType = 'string';
     public $incrementing = false;
+
+    public function items()
+    {
+        return $this->hasMany(Item::class, 'unit_id');
+    }
 }

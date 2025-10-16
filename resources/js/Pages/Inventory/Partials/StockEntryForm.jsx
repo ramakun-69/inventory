@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import TextInput from "../../../src/components/ui/TextInput";
 import { Icon } from "@iconify/react/dist/iconify.js";
 
-export default function ItemRequestForm({ items, errors, data, setData, clearErrors }) {
+export default function StockEntryForm({ items, errors, data, setData, clearErrors, suppliers }) {
     const { t } = useTranslation();
     // Tambah baris baru
     const addRow = () => {
@@ -27,19 +27,6 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
     };
     return (
         <div className="space-y-5">
-            {/* PURPOSE */}
-            <div className="mb-4">
-                <label className="form-label fw-semibold">{t("Purpose")}</label>
-                <TextInput
-                    type="text"
-                    value={data.purpose}
-                    onChange={(e) => setData("purpose", e.target.value)}
-                    className="form-control"
-                    placeholder={t("Enter Attribute", { attribute: t("Purpose") })}
-                    errorMessage={errors?.purpose}
-                />
-            </div>
-
             <h6 className="fw-bold mt-3">{t("Item List")}</h6>
 
             {/* FORM BARANG */}
@@ -55,7 +42,7 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
                     >
                         <div className="row">
                             {/* ITEM */}
-                            <div className="col-md-5">
+                            <div className="col-md-4">
                                 <label className="form-label text-gray-600">{t("Item")}</label>
                                 <Select
                                     options={items}
@@ -71,9 +58,27 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
                                     <small className="text-danger">{errors[`items.${index}.item_id`]}</small>
                                 )}
                             </div>
+                            <div className="col-md-4">
+                                <label className="form-label text-gray-600">{t("Supplier")}</label>
+                                <Select
+                                    options={suppliers} // langsung data mentah dari DB
+                                    getOptionLabel={(supplier) => supplier.name} // tampilkan nama
+                                    getOptionValue={(supplier) => supplier.id}   // ambil id sebagai value
+                                    // cari value yang cocok
+                                    value={suppliers.find(opt => String(opt.id) === String(row.supplier_id)) || null}
+                                    onChange={(val) => handleChange(index, "supplier_id", val?.id || null)}
+                                    placeholder={t("Select Supplier")}
+                                    isClearable
+                                    isSearchable
+                                />
+
+                                {errors?.[`items.${index}.supplier_id`] && (
+                                    <small className="text-danger">{errors[`items.${index}.supplier_id`]}</small>
+                                )}
+                            </div>
 
                             {/* JUMLAH */}
-                            <div className="col-md-4">
+                            <div className="col-md-2">
                                 <label className="form-label text-gray-600">{t("Quantity")}</label>
                                 <TextInput
                                     type="number"
@@ -93,7 +98,7 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
                             </div>
 
                             {/* TOMBOL AKSI */}
-                            <div className={`col-md-3 d-flex gap-2 align-items-center ${index > 0 ? 'mt-40' : 'mt-40'}`}>
+                            <div className={`col-md-2 d-flex gap-2 align-items-center ${index > 0 ? 'mt-40' : 'mt-40'}`}>
                                 {index === data.items.length - 1 && (
                                     <Button
                                         type="button"

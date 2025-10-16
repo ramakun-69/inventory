@@ -112,15 +112,12 @@ class CDatatable extends Controller
     public function items(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $data = Item::with(['category', 'supplier', 'unit'])
+        $data = Item::with(['category', 'unit'])
             ->when($request->has('search'), function ($query) use ($request) {
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
                     $q->whereAny(['name', 'item_code'], "%{$search}%")
                         ->orWhereHas('category', function ($q2) use ($search) {
-                            $q2->where('name', 'like', "%{$search}%");
-                        })
-                        ->orWhereHas('supplier', function ($q2) use ($search) {
                             $q2->where('name', 'like', "%{$search}%");
                         });
                 });
@@ -137,17 +134,12 @@ class CDatatable extends Controller
     public function stockEntries(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $data = StockEntry::with(['item', 'supplier', 'user'])
+        $data = StockEntry::with(['details', 'supplier', 'user'])
+            // Filter pencarian
             ->when($request->has('search'), function ($query) use ($request) {
                 $search = $request->get('search');
                 $query->where(function ($q) use ($search) {
-                    $q->whereAny(['entry_number'], "%{$search}%")
-                        ->orWhereHas('item', function ($q2) use ($search) {
-                            $q2->where('name', 'like', "%{$search}%");
-                        })
-                        ->orWhereHas('supplier', function ($q2) use ($search) {
-                            $q2->where('name', 'like', "%{$search}%");
-                        })
+                    $q->where('entry_number', 'like', "%{$search}%")
                         ->orWhereHas('user', function ($q2) use ($search) {
                             $q2->where('name', 'like', "%{$search}%");
                         });

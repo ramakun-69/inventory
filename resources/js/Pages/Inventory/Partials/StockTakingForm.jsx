@@ -49,13 +49,6 @@ export default function StockTakingForm({ items, errors, data, setData, clearErr
         setData("items", updated);
     };
 
-
-    // === Opsi item untuk select ===
-    const itemOptions = items.map((item) => ({
-        value: item.id,
-        label: `${item.item_code} - ${item.name} (${item?.category?.name})`,
-    }));
-
     return (
         <div className="space-y-5">
             <h6 className="fw-bold mt-3">{t("Item List")}</h6>
@@ -77,11 +70,11 @@ export default function StockTakingForm({ items, errors, data, setData, clearErr
                                     {t("Item")}
                                 </label>
                                 <Select
-                                    options={itemOptions}
-                                    value={itemOptions.find((opt) => opt.value === row.item_id) || null}
-                                    onChange={(val) =>
-                                        handleChange(index, "item_id", val?.value || null)
-                                    }
+                                    options={items}
+                                    getOptionLabel={(item) => item.name}
+                                    getOptionValue={(item) => item.id}
+                                    value={items.find(opt => opt.id === row.item_id) || null}
+                                    onChange={(val) => handleChange(index, "item_id", val?.id || null)}
                                     placeholder={t("Select Item")}
                                     isClearable
                                     isSearchable

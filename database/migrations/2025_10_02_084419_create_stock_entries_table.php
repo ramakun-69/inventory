@@ -14,9 +14,6 @@ return new class extends Migration
         Schema::create('stock_entries', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('entry_number')->unique();
-            $table->foreignUuid('item_id')->constrained()->onDelete('cascade');
-            $table->foreignUuid('supplier_id')->constrained()->onDelete('cascade');
-            $table->integer('quantity');
             $table->date('entry_date');
             $table->timestamps();
             $table->softDeletes();

@@ -297,6 +297,10 @@
     "Item Name" : "Nama Barang",
     "Quantity" : "Jumlah",
     "Unit" : "Satuan",
+    "Supplier" : "Pemasok",
+    "Quantity must be at least 1" : "Kuantitas harus minimal 1",
+    "Stock entry updated successfully" : "Entri Stok berhasil diperbarui",
+    "Stock entry deleted successfully" : "Entri Stok berhasil dihapus",
     "Pending" : "Pending",
     "Profile updated successfully" : "Profil berhasil diperbarui."
 }

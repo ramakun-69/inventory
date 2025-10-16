@@ -13,7 +13,6 @@ class ItemRequest extends FormRequest
         'item_code' => 1,
         'category_id' => 1,
         'unit_id' => 1,
-        'supplier_id' => 1,
         'stock' => 1,
         'image' => 0,
         'description' => 0,
