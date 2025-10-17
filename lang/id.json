@@ -302,5 +302,6 @@
     "Stock entry updated successfully" : "Entri Stok berhasil diperbarui",
     "Stock entry deleted successfully" : "Entri Stok berhasil dihapus",
     "Pending" : "Pending",
-    "Profile updated successfully" : "Profil berhasil diperbarui."
+    "Profile updated successfully" : "Profil berhasil diperbarui.",
+    "Quantity cannot exceed available stock (:stock)" : "Kuantitas tidak boleh melebihi stok yang tersedia (:stock)"
 }

@@ -86,7 +86,6 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
                                         const num = Number(e.target.value);
                                         const selectedItem = items.find(opt => opt.id === row.item_id);
                                         const maxStock = selectedItem?.stock ?? Infinity;
-                                        console.log(selectedItem?.stock);
                                         
                                         // batasi agar tidak melebihi stok
                                         const safeValue = num > maxStock ? maxStock : num;

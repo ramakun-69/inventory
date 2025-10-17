@@ -9,7 +9,6 @@ import Search from "../../src/components/datatable/Search";
 import DataTable from "react-data-table-component";
 import Loading from "../../src/components/datatable/Loading";
 import Modal from "../../src/components/ui/Modal";
-import Select from "react-select";
 import { useForm } from "@inertiajs/react";
 import AppLayout from "../../Layouts/AppLayout";
 import Breadcrumb from "../../src/components/ui/Breadcrumb";
@@ -170,11 +169,11 @@ export default function ItemRequest({ items }) {
                     item_id: item.item_id ?? item.id ?? null,
                     name: item.name ?? "",
                     quantity: item.quantity ?? item.pivot?.quantity ?? "",
-                    unit : item?.unit?.name ?? "-",
+                    unit: item?.unit?.name ?? "-",
                 }))
                 : [{ item_id: null, quantity: "" }],
         });
-        
+
         setModal({
             show: true,
             title: detail

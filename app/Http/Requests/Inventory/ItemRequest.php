@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Inventory;
 
+use App\Models\Item;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ItemRequest extends FormRequest
@@ -44,13 +45,31 @@ class ItemRequest extends FormRequest
                     // validasi array items
                     $rules[$key] .= '|array|min:1';
                     $rules["{$key}.*.item_id"] = 'required|exists:items,id';
-                    $rules["{$key}.*.quantity"] = 'required|numeric|min:1';
+                    $rules["{$key}.*.quantity"] = [
+                        'required',
+                        'numeric',
+                        'min:1',
+                        function ($attribute, $value, $fail) {
+                            // Ambil index dari "items.X.quantity"
+                            $index = explode('.', $attribute)[1];
+                            $itemId = $this->input("items.$index.item_id");
+
+                            if ($itemId) {
+                                $stock = Item::where('id', $itemId)->value('stock');
+
+                                if ($stock !== null && $value > $stock) {
+                                    $fail(__("Quantity cannot exceed available stock (:stock)", ['stock' => $stock]));
+                                }
+                            }
+                        }
+                    ];
                     break;
             }
         }
 
         return $rules;
     }
+
 
     public function messages()
     {
