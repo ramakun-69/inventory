@@ -27,7 +27,7 @@ class CItemRequest extends Controller
     {
         return inertia('Inventory/ItemRequest', [
             'items' => Item::with('category:id,name')
-                ->select('id', 'name', 'item_code', 'category_id')
+                ->select('id', 'name', 'item_code','stock', 'category_id')
                 ->get()
 
         ]);

@@ -81,9 +81,16 @@ export default function ItemRequestForm({ items, errors, data, setData, clearErr
                                     onKeyDown={(e) => {
                                         if (["e", "-", "+"].includes(e.key)) e.preventDefault();
                                     }}
+
                                     onChange={(e) => {
-                                        const numOnly = e.target.value.replace(/\D/, "");
-                                        handleChange(index, "quantity", numOnly);
+                                        const num = Number(e.target.value);
+                                        const selectedItem = items.find(opt => opt.id === row.item_id);
+                                        const maxStock = selectedItem?.stock ?? Infinity;
+                                        console.log(selectedItem?.stock);
+                                        
+                                        // batasi agar tidak melebihi stok
+                                        const safeValue = num > maxStock ? maxStock : num;
+                                        handleChange(index, "quantity", safeValue);
                                     }}
                                     className="form-control"
                                     placeholder={t("Enter Attribute", { attribute: t("Quantity") })}
