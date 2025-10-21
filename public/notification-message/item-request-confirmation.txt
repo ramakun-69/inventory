@@ -1,0 +1,16 @@
+Hallo *#NAME#*,
+
+Permintaan barang anda dengan nomor transaksi *#REQUEST_NUMBER#* telah dikonfirmasi dengan status *#STATUS#*. Berikut adalah rincian permintaan anda:
+
+Tanggal Permintaan  : *#REQUEST_DATE#*
+Keperluan           : *#PURPOSE#*
+
+*DAFTAR BARANG* : 
+---------------------------------------------
+#LIST_ITEMS#
+---------------------------------------------
+
+Silahkan cek aplikasi inventory untuk informasi lebih lanjut.
+
+Salam,
+Administrator

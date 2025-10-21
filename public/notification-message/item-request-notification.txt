@@ -1,0 +1,16 @@
+Hallo *#NAME#*
+
+Ada permintaan barang baru dengan rincian sebagai berikut:
+
+*Nomor Transaksi*      : #REQUEST_NUMBER#
+*Di Ajukan Oleh*       : #REQUEST_BY#
+*Tanggal Permintaan*   : #REQUEST_DATE#
+*Tujuan*               : #PURPOSE#
+--------------------------------------------------
+*DAFTAR BARANG*          :
+#LIST_ITEMS#
+--------------------------------------------------
+Silahkan cek aplikasi inventory untuk informasi lebih lanjut.
+
+Salam,
+Administrator

@@ -1,0 +1,14 @@
+.rdt_TableCol input[type="checkbox"],
+.rdt_TableCell input[type="checkbox"] {
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+    -moz-appearance: checkbox !important;
+    display: inline-block !important;
+    position: static !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer !important;
+    accent-color: #487fff;
+}
