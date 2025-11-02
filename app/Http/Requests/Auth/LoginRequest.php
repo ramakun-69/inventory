@@ -61,7 +61,6 @@ class LoginRequest extends FormRequest
                 default:
                     $dataValidate[$key] = [
                         ($this->fill[$key] == 1) ? 'required' : 'nullable',
-                        'string',
                     ];
                     break;
             }
