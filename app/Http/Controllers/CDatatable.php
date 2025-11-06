@@ -135,7 +135,7 @@ class CDatatable extends Controller
     public function stockEntries(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-        $data = StockEntry::with(['details', 'supplier', 'user'])
+        $data = StockEntry::with(['details', 'user'])
             // Filter pencarian
             ->when($request->has('search'), function ($query) use ($request) {
                 $search = $request->get('search');
