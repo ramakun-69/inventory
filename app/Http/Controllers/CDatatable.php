@@ -280,4 +280,29 @@ class CDatatable extends Controller
             'per_page' => $data->perPage(),
         ]);
     }
+
+    public function lowStockItems(Request $request)
+    {
+
+        $perPage = $request->get('per_page', 10);
+        $data = Item::with(['category', 'unit'])
+            ->when($request->has('search'), function ($query) use ($request) {
+                $search = $request->get('search');
+                $query->where(function ($q) use ($search) {
+                    $q->whereAny(['name', 'item_code'], "%{$search}%")
+                        ->orWhereHas('category', function ($q2) use ($search) {
+                            $q2->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })->where('stock', '<=', 3)
+            ->paginate($perPage);
+
+
+        return response()->json([
+            'data' => $data->items(),
+            'total' => $data->total(),
+            'current_page' => $data->currentPage(),
+            'per_page' => $data->perPage(),
+        ]);
+    }
 }

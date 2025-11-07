@@ -18,4 +18,5 @@ Route::prefix('datatable')->name('datatable.')->middleware(['auth'])
         Route::get('item-report', 'itemReport')->name('item-report'),
         Route::get('stock-entry-report', 'stockEntryReport')->name('stock-entry-report'),
         Route::get('item-request-report', 'itemRequestReport')->name('item-request-report'),
+        Route::get('low-stock-items', 'lowStockItems')->name('low-stock-items'),
     ]);

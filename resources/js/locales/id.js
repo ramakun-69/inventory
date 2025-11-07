@@ -210,5 +210,6 @@ export default {
         "Verify OTP" : "Verifikasi OTP",
         "OTP will expire in" : "OTP akan kedaluwarsa dalam",
         "Resend OTP" : "Kirim Ulang OTP",
+        "Low Stock Items" : "Barang Dengan Stok Rendah"
     }
 };

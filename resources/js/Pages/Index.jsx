@@ -4,6 +4,10 @@ import AppLayout from "../Layouts/AppLayout";
 import Breadcrumb from "../src/components/ui/Breadcrumb";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import Chart from "react-apexcharts";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import DataTable from "react-data-table-component";
+import Loading from './../src/components/datatable/Loading';
 
 export default function Index({ ...props }) {
     const { t } = useTranslation();
@@ -32,6 +36,71 @@ export default function Index({ ...props }) {
         title: { text: t("Most Requested Items"), align: "left" },
     };
     const pieChartSeries = props.popularItems?.map((i) => i.count) || [];
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [tableData, setTableData] = useState([]);
+    // Pagination states
+    const [totalRows, setTotalRows] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    // Search state
+    const [search, setSearch] = useState('');
+    const loadTableData = () => {
+        setIsLoading(true);
+        axios.get(route('datatable.items'), {
+            params: {
+                page: currentPage,
+                per_page: rowsPerPage,
+                search: search,
+            },
+        }).then((res) => {
+            setTableData(res.data.data);
+            setTotalRows(res.data.total);
+            setIsLoading(false);
+        });
+    };
+    useEffect(() => {
+        loadTableData();
+    }, [currentPage, rowsPerPage, search]);
+    const COLUMN = [
+        {
+            name: 'No',
+            cell: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
+            sortable: true,
+            width: '100px',
+            style: {
+                textAlign: 'center',
+            },
+        },
+        {
+            name: t('Image'),
+            cell: (row) => (
+                row.image_url ? (
+                    <img src={row.image_url} alt={row.name} className="img-thumbnail" style={{ width: '50px', height: '50px' }} />
+                ) : null
+            ),
+        },
+        {
+            name: t('Item Code'),
+            selector: row => row.item_code,
+            sortable: true,
+        },
+        {
+            name: t('Name'),
+            selector: row => row.name,
+            sortable: true,
+        },
+        {
+            name: t('Category'),
+            selector: row => row.category.name,
+            sortable: true,
+        },
+        {
+            name: t('Stock'),
+            selector: row => `${row.stock} ${row?.unit?.name}`,
+            sortable: true,
+        },
+    ];
 
     return (
         <AppLayout >
@@ -161,6 +230,43 @@ export default function Index({ ...props }) {
                                 type="pie"
                                 height={350}
                             />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="row mt-5 gy-4">
+                <div className="card">
+                    <div className="card-body">
+                        <div className="card-title">{t('Low Stock Items')}</div>
+                        <div className="col-12">
+                            <DataTable
+                                className="table-responsive"
+                                columns={COLUMN}
+                                data={tableData}
+                                progressPending={isLoading}
+                                noDataComponent={isLoading ? (
+                                    <Loading />
+                                ) : search && tableData.length === 0 ? (
+                                    t('datatable.zeroRecords')
+                                ) : (
+                                    t('datatable.emptyTable')
+                                )
+                                }
+                                searchable
+                                defaultSortField="name"
+                                progressComponent={<Loading />}
+                                pagination
+                                paginationServer
+                                paginationTotalRows={totalRows}
+                                paginationPerPage={rowsPerPage}
+                                onChangePage={page => setCurrentPage(page)}
+                                onChangeRowsPerPage={(newPerPage, page) => {
+                                    setRowsPerPage(newPerPage);
+                                    setCurrentPage(page);
+                                }}
+                                highlightOnHover
+                                persistTableHead
+                                striped />
                         </div>
                     </div>
                 </div>
