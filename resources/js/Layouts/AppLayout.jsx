@@ -134,11 +134,11 @@ const AppLayout = ({ children }) => {
                         <div className='col-auto'>
                             <p className='mb-0'>© {new Date().getFullYear()} Inventory App. All Rights Reserved.</p>
                         </div>
-                        <div className='col-auto'>
+                        {/* <div className='col-auto'>
                             <p className='mb-0'>
                                 Developer by <span className='text-primary-600'>PT. Erasites Citra Digital Indonesia</span>
                             </p>
-                        </div>
+                        </div> */}
                     </div>
                 </footer>
             </main>

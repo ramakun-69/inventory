@@ -47,7 +47,7 @@ export default function Index({ ...props }) {
     const [search, setSearch] = useState('');
     const loadTableData = () => {
         setIsLoading(true);
-        axios.get(route('datatable.items'), {
+        axios.get(route('datatable.low-stock-items'), {
             params: {
                 page: currentPage,
                 per_page: rowsPerPage,

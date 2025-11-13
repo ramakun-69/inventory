@@ -29,7 +29,9 @@ class FonnteServiceImplement extends ServiceApi implements FonnteService
         'delay' => '2',
         'countryCode' => '62',
       ], $options);
-      $response = Http::withHeaders([
+      $response = Http::withOption([
+        'verify' => false,
+      ])->withHeaders([
         'Authorization' => $this->token,
       ])->post($this->apiUrl, $payload);
       // dd($response->body());
